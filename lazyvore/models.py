@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column,
-    # Index,
+    String,
     Integer,
     Text,
     )
@@ -27,7 +27,7 @@ class Page(Base):
     """ The SQLAlchemy declarative model class for a Page object. """
     __tablename__ = 'pages'
     id = Column(Integer, primary_key=True)
-    name = Column(Text, unique=True)
+    name = Column(String(length=100), unique=True)
     data = Column(Text)
 
 class RootFactory(object):
