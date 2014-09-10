@@ -20,10 +20,11 @@ requires = [
     'docutils',
     'WebTest',
     'alembic',
+    'mysql-connector-python',
     ]
 
 setup(name='Lazyvore',
-      version='0.1.0',
+      version='0.1.1',
       description='Lazyvore',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
