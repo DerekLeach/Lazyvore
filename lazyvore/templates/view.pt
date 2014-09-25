@@ -14,7 +14,7 @@
         href="${request.static_url('lazyvore:static/theme.css')}"
         type="text/css" media="screen" charset="utf-8" />
   <!--[if lte IE 6]>
-  <link rel="stylecheet"
+  <link rel="stylesheet"
         href="${request.static_url('lazyvore:static/ie6.css')}"
         type="text/css" media="screen" charset="utf-8" />
   <![endif]-->

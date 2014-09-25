@@ -13,9 +13,9 @@ from pyramid.view import (
         )
 
 from .models import (
-    DBSession,
-    Page,
-    )
+        DBSession,
+        Page,
+        )
 
 from pyramid.security import (
         remember,
@@ -95,7 +95,7 @@ def login(request):
     referrer = request.url
     if referrer == login_url:
         referrer = '/' # never use the login form itself as came_from
-    came_from = request.params.get('came_from', referrer)
+    came_from = request.params.get('came_from', default=referrer)
     message = ''
     login = ''
     password = ''
