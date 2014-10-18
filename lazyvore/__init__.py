@@ -10,11 +10,14 @@ from .models import (
     Base,
     )
 
+from os.path import expandvars
+
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    engine = engine_from_config(settings, 'sqlalchemy.')
+    db_url = expandvars(settings.get('sqlalchemy.url'))
+    engine = engine_from_config(settings, 'sqlalchemy.', url=db_url)
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
     authn_policy = AuthTktAuthenticationPolicy(
