@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     supervisor
 
-# Add requirements.txt separately so that Docker can use it's cache effectively.
+# Add requirements.txt separately so that Docker can use its cache effectively.
 ADD ./requirements.txt /home/docker/code/
 WORKDIR /home/docker/code/
 RUN pip3 install --allow-external mysql-connector-python -r requirements.txt
