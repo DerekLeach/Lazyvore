@@ -2,6 +2,13 @@ import cgi
 import re
 from docutils.core import publish_parts
 
+import colander
+
+from deform import (
+        Form,
+        ValidationFailure,
+        )
+
 from pyramid.httpexceptions import (
         HTTPFound,
         HTTPNotFound,
@@ -15,7 +22,10 @@ from pyramid.view import (
 from .models import (
     DBSession,
     Page,
+    User,
     )
+
+from colanderalchemy import SQLAlchemySchemaNode
 
 from pyramid.security import (
         remember,
@@ -102,10 +112,14 @@ def login(request):
     if 'form.submitted' in request.params:
         login = request.params['login']
         password = request.params['password']
-        if USERS.get(login) == password:
+
+        if (DBSession.query(User).filter_by(user=login)
+            .value('password')) == password:
+
             headers = remember(request, login)
-            return HTTPFound(location = came_from,
+            return HTTPFound(location = request.route_url('view_wiki'),
                              headers = headers)
+
         message = 'Failed login'
 
     return dict(
@@ -121,3 +135,53 @@ def logout(request):
     headers = forget(request)
     return HTTPFound(location = request.route_url('view_wiki'),
                      headers = headers)
+
+schema = SQLAlchemySchemaNode(User,
+                              includes=['user', 'password'],
+                              )
+signupForm = Form(schema, buttons=('submit',))
+
+@view_config(route_name='signup', renderer='templates/signup.pt')
+def signup(request):
+    login_url = request.route_url('login')
+    referrer = request.url
+    if referrer == login_url:
+        referrer = '/' # never use the login form itself as came_from
+    came_from = request.params.get('came_from', )
+    message = 'test'
+    
+    if 'submit' in request.POST:
+        controls = request.POST.items()
+
+        try:
+            appstruct = signupForm.validate(controls)
+        except ValidationFailure as e:
+            return dict(
+                    form = e.render(),
+                    came_from = came_from,
+                    message = message,
+                    css_links = signupForm.get_widget_resources()['css'],
+                    js_links = signupForm.get_widget_resources()['js'],
+                    )
+        username = appstruct['user']
+        password = appstruct['password']
+        exists = DBSession.query(User).filter_by(user=username).first()
+        if not exists:
+            user = User(user=username, password=password)
+            DBSession.add(user)
+            headers = remember(request, username)
+
+            return HTTPFound(
+                    location = request.route_url('view_wiki'),
+                    headers = headers,
+                    )
+        message = 'The user "{}" already exists.'.format(username)
+
+    return dict(
+            message = message,
+            url = request.application_url + '/signup',
+            came_from = came_from,
+            form = signupForm.render(),
+            css_links = signupForm.get_widget_resources()['css'],
+            js_links = signupForm.get_widget_resources()['js'],
+            )

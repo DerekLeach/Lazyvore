@@ -47,6 +47,8 @@
                  value="${password}"/><br/>
           <input type="submit" name="form.submitted" value="Log In"/>
         </form>
+        Or else <a href="${request.application_url}/signup">Sign-up</a>.<br/>
+        ${came_from}
       </div>
     </div>
   </div>

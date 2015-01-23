@@ -21,6 +21,11 @@ requires = [
     'WebTest',
     'alembic',
     'mysql-connector-python',
+    'cryptacular',
+    'pycrypto',
+    'deform',
+    'colander',
+    'ColanderAlchemy',
     ]
 
 setup(name='Lazyvore',
