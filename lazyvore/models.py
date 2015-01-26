@@ -13,6 +13,7 @@ from sqlalchemy.orm import (
     sessionmaker,
     relationship,
     backref,
+    synonym,
     )
 
 from zope.sqlalchemy import ZopeTransactionExtension
@@ -25,8 +26,35 @@ from pyramid.security import (
 
 from deform.widget import CheckedPasswordWidget
 
+import cryptacular.bcrypt
+
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
+
+crypt = cryptacular.bcrypt.BCRYPTPasswordManager()
+
+def hash_password(password):
+    return crypt.encode(password)
+
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    user = Column(String(length=100), unique=True)
+
+    _password = Column(String(length=50),
+                       info={'colanderalchemy': {'widget': CheckedPasswordWidget(size=20)}})
+
+    def _get_password(self):
+        return self._password
+
+    def _set_password(self, password):
+        self._password = hash_password(password)
+
+    password = property(_get_password, _set_password)
+    password = synonym('_password', descriptor=password)
+
+    # @classmethod
+    # def check_password(cls, username
 
 class Page(Base):
     """ The SQLAlchemy declarative model class for a Page object. """
@@ -34,13 +62,6 @@ class Page(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(length=100), unique=True)
     data = Column(Text)
-
-class User(Base):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    user = Column(String(length=100), unique=True)
-    password = Column(String(length=50),
-                      info={'colanderalchemy': {'widget': CheckedPasswordWidget(size=20)}})
 
 # class Group(Base):
 #     __tablename__ = 'groups'
