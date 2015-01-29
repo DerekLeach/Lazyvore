@@ -8,12 +8,13 @@ from sqlalchemy import (
 
 from sqlalchemy.ext.declarative import declarative_base
 
+# from sqlalchemy.ext.hybrid import hybrid_property
+
 from sqlalchemy.orm import (
     scoped_session,
     sessionmaker,
     relationship,
     backref,
-    synonym,
     )
 
 from zope.sqlalchemy import ZopeTransactionExtension
@@ -39,22 +40,30 @@ def hash_password(password):
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
-    user = Column(String(length=100), unique=True)
+    username = Column(String(length=100), unique=True)
 
-    _password = Column(String(length=50),
+    _password = Column("password", String(length=60),
                        info={'colanderalchemy': {'widget': CheckedPasswordWidget(size=20)}})
 
-    def _get_password(self):
+    @property
+    def password(self):
+        """Return the password hash."""
         return self._password
 
-    def _set_password(self, password):
+    @password.setter
+    def password(self, password):
         self._password = hash_password(password)
 
-    password = property(_get_password, _set_password)
-    password = synonym('_password', descriptor=password)
+    @classmethod
+    def get_by_username(cls, username):
+        return DBSession.query(cls).filter(cls.username == username).first()
 
-    # @classmethod
-    # def check_password(cls, username
+    @classmethod
+    def check_password(cls, username, password):
+        user = cls.get_by_username(username)
+        if not user:
+            return False
+        return crypt.check(user.password, password)
 
 class Page(Base):
     """ The SQLAlchemy declarative model class for a Page object. """

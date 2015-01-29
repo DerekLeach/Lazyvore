@@ -113,8 +113,9 @@ def login(request):
         login = request.params['login']
         password = request.params['password']
 
-        if (DBSession.query(User).filter_by(user=login)
-            .value('password')) == password:
+        # if (DBSession.query(User).filter_by(user=login)
+        #     .value('password')) == password:
+        if User.check_password(login, password):
 
             headers = remember(request, login)
             return HTTPFound(location = request.route_url('view_wiki'),
@@ -137,7 +138,7 @@ def logout(request):
                      headers = headers)
 
 schema = SQLAlchemySchemaNode(User,
-                              includes=['user', 'password'],
+                              includes=['username', '_password'],
                               )
 signupForm = Form(schema, buttons=('submit',))
 
@@ -163,11 +164,12 @@ def signup(request):
                     css_links = signupForm.get_widget_resources()['css'],
                     js_links = signupForm.get_widget_resources()['js'],
                     )
-        username = appstruct['user']
-        password = appstruct['password']
-        exists = DBSession.query(User).filter_by(user=username).first()
-        if not exists:
-            user = User(user=username, password=password)
+        username = appstruct['username']
+        password = appstruct['_password']
+        # exists = DBSession.query(User).filter_by(user=username).first()
+        if not User.get_by_username(username):
+        # if not exists:
+            user = User(username=username, password=password)
             DBSession.add(user)
             headers = remember(request, username)
 
