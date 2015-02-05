@@ -1,8 +1,12 @@
 from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 
-from pyramid.authentication import AuthTktAuthenticationPolicy
+# from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
+
+from beaker.session import CookieSession
+
 from lazyvore.security import groupfinder
 
 from .models import (
@@ -22,11 +26,14 @@ def main(global_config, **settings):
     Base.metadata.bind = engine
     authn_policy = AuthTktAuthenticationPolicy(
             'sosecret', callback=groupfinder, hashalg='sha512')
+    authn_policy = SessionAuthenticationPolicy()
     authz_policy = ACLAuthorizationPolicy()
+    session_factory = CookieSession()
     config = Configurator(settings=settings,
                           root_factory='lazyvore.models.RootFactory')
     config.set_authentication_policy(authn_policy)
     config.set_authorization_policy(authz_policy)
+    config.set_session_factory(session_factory)
     config.include('pyramid_chameleon')
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_static_view('static_deform', 'deform:static')
