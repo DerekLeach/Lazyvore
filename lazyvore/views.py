@@ -19,6 +19,8 @@ from pyramid.view import (
         forbidden_view_config,
         )
 
+from pyramid.renderers import render
+
 from .models import (
     DBSession,
     Page,
@@ -63,8 +65,15 @@ def view_page(request):
     content = publish_parts(page.data, writer_name='html')['html_body']
     content = wikiwords.sub(check, content)
     edit_url = request.route_url('edit_page', pagename=pagename)
-    return dict(page=page, content=content, edit_url=edit_url,
-                logged_in = request.authenticated_userid)
+
+    login_form = login_form_view(request)
+
+    return dict(
+            page=page,
+            content=content,
+            edit_url=edit_url,
+            login_form = login_form,
+            )
 
 @view_config(route_name='add_page', renderer='templates/edit.pt',
              permission='edit')
@@ -78,8 +87,14 @@ def add_page(request):
                                                       pagename=pagename))
     save_url = request.route_url('add_page', pagename=pagename)
     page = Page(name='', data='')
-    return dict(page=page, save_url=save_url,
-                logged_in = request.authenticated_userid)
+
+    login_form = login_form_view(request)
+
+    return dict(
+            page=page,
+            save_url=save_url,
+            login_form = login_form,
+            )
 
 @view_config(route_name='edit_page', renderer='templates/edit.pt',
              permission='edit')
@@ -91,51 +106,55 @@ def edit_page(request):
         DBSession.add(page)
         return HTTPFound(location = request.route_url('view_page',
                                                       pagename=pagename))
+
+    login_form = login_form_view(request)
+
     return dict(
             page=page,
             save_url = request.route_url('edit_page', pagename=pagename),
-            logged_in = request.authenticated_userid,
+            login_form = login_form,
             )
 
 
 @view_config(route_name='login', renderer='templates/login.pt')
 @forbidden_view_config(renderer='templates/login.pt')
 def login(request):
-    login_url = request.route_url('login')
-    referrer = request.url
-    if referrer == login_url:
-        referrer = '/' # never use the login form itself as came_from
-    came_from = request.params.get('came_from', referrer)
-    message = ''
-    login = ''
-    password = ''
+    main_view = request.route_url('view_wiki')
+    came_from = request.params.get('came_from', main_view)
     if 'form.submitted' in request.params:
         login = request.params['login']
         password = request.params['password']
 
-        # if (DBSession.query(User).filter_by(user=login)
-        #     .value('password')) == password:
         if User.check_password(login, password):
 
             headers = remember(request, login)
-            return HTTPFound(location = request.route_url('view_wiki'),
+            return HTTPFound(location = came_from,
                              headers = headers)
 
-        message = 'Failed login'
+    return HTTPFound(location = came_from)
 
-    return dict(
-            message = message,
-            url = request.application_url + '/login',
-            came_from = came_from,
-            login = login,
-            password = password,
-            )
 
 @view_config(route_name='logout')
 def logout(request):
     headers = forget(request)
     return HTTPFound(location = request.route_url('view_wiki'),
                      headers = headers)
+
+def login_form_view(request):
+    login_url = request.route_url('login')
+    referrer = request.url
+    if referrer == login_url:
+        referrer = '/' # never use the login form itself as came_from
+    came_from = request.params.get('came_from', referrer)
+    response = dict(
+            message = '',
+            login = '',
+            password = '',
+            logged_in = request.authenticated_userid,
+            url = request.route_url('login'),
+            came_from = came_from,
+            )
+    return render('templates/login.pt', response, request)
 
 schema = SQLAlchemySchemaNode(User,
                               includes=['username', '_password'],
