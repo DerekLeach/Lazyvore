@@ -5,7 +5,7 @@ from sqlalchemy import engine_from_config
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 
-from beaker.session import CookieSession
+from pyramid_beaker import session_factory_from_settings
 
 from lazyvore.security import groupfinder
 
@@ -24,17 +24,18 @@ def main(global_config, **settings):
     engine = engine_from_config(settings, 'sqlalchemy.', url=db_url)
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
-    authn_policy = AuthTktAuthenticationPolicy(
-            'sosecret', callback=groupfinder, hashalg='sha512')
     authn_policy = SessionAuthenticationPolicy()
     authz_policy = ACLAuthorizationPolicy()
-    session_factory = CookieSession()
+    # encrypt_key = expandvars(settings.get('session.encrypt_key'))
+    # validate_key = expandvars(settings.get('session.validate_key'))
+    session_factory = session_factory_from_settings(settings=settings,)
+                                                 # encrypt_key=encrypt_key,
+                                                 # validate_key=validate_key)
     config = Configurator(settings=settings,
                           root_factory='lazyvore.models.RootFactory')
     config.set_authentication_policy(authn_policy)
     config.set_authorization_policy(authz_policy)
     config.set_session_factory(session_factory)
-    config.include('pyramid_chameleon')
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_static_view('static_deform', 'deform:static')
     config.add_route('view_wiki', '/')
