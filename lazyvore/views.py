@@ -128,15 +128,19 @@ def login(request):
         if User.check_password(login, password):
 
             headers = remember(request, login)
+            request.session.flash('Logged in successfully')
             return HTTPFound(location = came_from,
                              headers = headers)
 
+    request.session.flash('Failed login')
     return HTTPFound(location = came_from)
 
 
 @view_config(route_name='logout')
 def logout(request):
     headers = forget(request)
+    request.session.invalidate()
+    request.session.flash('Logged out successfully')
     return HTTPFound(location = request.route_url('view_wiki'),
                      headers = headers)
 
