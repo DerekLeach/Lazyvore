@@ -13,6 +13,7 @@ requires = [
     'pyramid_chameleon',
     'pyramid_debugtoolbar',
     'pyramid_tm',
+    'pyramid_beaker',
     'SQLAlchemy',
     'transaction',
     'zope.sqlalchemy',
@@ -21,6 +22,11 @@ requires = [
     'WebTest',
     'alembic',
     'mysql-connector-python',
+    'cryptacular',
+    'pycrypto',
+    'deform',
+    'colander',
+    'ColanderAlchemy',
     ]
 
 setup(name='Lazyvore',

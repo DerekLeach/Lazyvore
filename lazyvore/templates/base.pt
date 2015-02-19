@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"
+      xmlns:tal="http://xml.zope.org/namespaces/tal"
+      xmlns:metal="http://xml.zope.org/namespaces/metal">
+<head>
+  <title>${page.name} - Lazyvore</title>
+  <meta charset="utf-8" />
+  <meta name="keywords" content="recipe sharing" />
+  <meta name="description" content="Recipe sharing web application" />
+  <!--[if IE]>
+    <link rel="shortcut icon" href="${request.static_url('lazyvore:static/favicon.ico')}" />
+  <![endif]-->
+  <link rel="icon"
+        href="${request.static_url('lazyvore:static/pyramid-16x16.png')}" />
+  <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></scirpt>
+  <![endif]-->
+  <link rel="stylesheet"
+        href="${request.static_url('lazyvore:static/theme.css')}"
+        type="text/css" media="screen" charset="utf-8" />
+  <script src="https://apis.google.com/js/client:platform.js" async defer></script>
+</head>
+<body>
+<div id="container">
+<header>
+  <h1>Lazyvore</h1>
+  <div id="message" tal:condition="request.session.peek_flash()">
+    <p tal:repeat="message request.session.pop_flash()">
+      ${message}
+    </p>
+  </div>
+</header>
+<nav>
+  <ul>
+    <li><a href="${request.route_url('view_wiki')}">Home</a></li>
+    <li><a href="${request.route_url('login')}">Login</a></li>
+  </ul>
+</nav>
+<aside tal:content="structure login_form">
+</aside>
+<metal:content define-slot="content" />
+</div>
+<footer>
+<p> the footer </p>
+</footer>
+</body>
+</html>
