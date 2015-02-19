@@ -1,7 +1,6 @@
 from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 
-# from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authentication import SessionAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 
@@ -20,17 +19,15 @@ from os.path import expandvars
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    db_url = expandvars(settings.get('sqlalchemy.url'))
-    engine = engine_from_config(settings, 'sqlalchemy.', url=db_url)
+    url = expandvars(settings.get('sqlalchemy.url'))
+    engine = engine_from_config(settings, 'sqlalchemy.', url=url)
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
     authn_policy = SessionAuthenticationPolicy()
     authz_policy = ACLAuthorizationPolicy()
-    # encrypt_key = expandvars(settings.get('session.encrypt_key'))
-    # validate_key = expandvars(settings.get('session.validate_key'))
-    session_factory = session_factory_from_settings(settings=settings,)
-                                                 # encrypt_key=encrypt_key,
-                                                 # validate_key=validate_key)
+    settings['session.encrypt_key'] = expandvars(settings.get('session.encrypt_key'))
+    settings['session.validate_key'] = expandvars(settings.get('session.validate_key'))
+    session_factory = session_factory_from_settings(settings=settings)
     config = Configurator(settings=settings,
                           root_factory='lazyvore.models.RootFactory')
     config.set_authentication_policy(authn_policy)

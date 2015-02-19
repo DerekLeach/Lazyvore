@@ -128,8 +128,6 @@ def login(request):
         if User.check_password(login, password):
 
             headers = remember(request, login)
-            print(headers)
-            print(request.session.items())
             request.session.flash('Logged in successfully')
             return HTTPFound(location = came_from,
                              headers = headers)
@@ -142,7 +140,6 @@ def login(request):
 def logout(request):
     headers = forget(request)
     request.session.invalidate()
-    request.session.delete()
     request.session.flash('Logged out successfully')
     return HTTPFound(location = request.route_url('view_wiki'),
                      headers = headers)
