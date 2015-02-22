@@ -12,14 +12,14 @@
   <input type="submit" name="form.submitted" value="Log In"/>
 </form>
 Or else <a href="${request.application_url}/signup">Sign-up</a>.<br/>
-${came_from}
+<h4>Login with Google+:</h4>
 <span id="signinButton">
   <span
     class="g-signin"
     data-callback="signinCallback"
     data-clientid="311409363904-tdvcelhl4t7g1n2d14fht1hl4g9m3rk6.apps.googleusercontent.com"
     data-cookiepolicy="single_host_origin"
-    data-reqeustvisibleactions="http://schema.org/AddAction"
+    data-reqeustvisibleactions="https://schema.org/AddAction"
     data-scope="profile">
   </span>
 </span>
