@@ -4,6 +4,7 @@ RUN apt-get update && apt-get install -y \
     nginx \
     python3 \
     python3-pip \
+    git \
     supervisor
 
 # Add requirements.txt separately so that Docker can use its cache effectively.

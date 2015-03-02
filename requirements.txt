@@ -1,4 +1,4 @@
--e git+http://github.com/TurboGears/beaker.git@py3native#egg=Beaker
+-e git://github.com/TurboGears/beaker.git@py3native#egg=Beaker
 Chameleon==2.16
 ColanderAlchemy==0.3.1
 Mako==1.0.0
