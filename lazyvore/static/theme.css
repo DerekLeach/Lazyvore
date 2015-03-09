@@ -84,3 +84,36 @@ h6 {
 p {
   font-weight: 300;
 }
+
+#gplusSignin {
+  display: inline-block;
+  background: #dd4b39;
+  color: white;
+  border-radius: 5px;
+  border: 0px;
+  white-space: nowrap;
+}
+
+#gplusSignin:hover {
+  background: #e74b37;
+  cursor: hand;
+}
+
+span.gplusIcon {
+  background: url('/static/gplus_btn_red.png') transparent 5px 50% no-repeat;
+  display: inline-block;
+  vertical-align: middle;
+  width: 35px;
+  height: 35px;
+  border-right: #bb3f30 1px solid;
+}
+
+span.gplusText {
+  display: inline-block;
+  vertical-align: middle;
+  padding-left: 35px;
+  padding-right: 35px;
+  font-size: 14px;
+  font-weight: bold;
+  font-family: 'Roboto',arial,sans-serif;
+}

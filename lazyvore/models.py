@@ -40,10 +40,12 @@ def hash_password(password):
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
-    username = Column(String(length=100), unique=True)
+    username = Column(String(length=100), unique=True, nullable=True)
 
-    _password = Column("password", String(length=60),
+    _password = Column("password", String(length=60), nullable=True,
                        info={'colanderalchemy': {'widget': CheckedPasswordWidget(size=20)}})
+
+    gplus_id = Column(String(length=30), unique=True, nullable=True)
 
     @property
     def password(self):
@@ -57,6 +59,10 @@ class User(Base):
     @classmethod
     def get_by_username(cls, username):
         return DBSession.query(cls).filter(cls.username == username).first()
+
+    @classmethod
+    def get_by_gplus_id(cls, gplus_id):
+        return DBSession.query(cls).filter(cls.gplus_id == gplus_id).first()
 
     @classmethod
     def check_password(cls, username, password):

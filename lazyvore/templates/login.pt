@@ -2,14 +2,53 @@
 <span tal:replace="message"/>
 <span tal:condition="logged_in">
   You are logged in as ${logged_in}.
-  <a href="${request.application_url}/logout">Logout</a>
+  <a onclick="gapi.auth.signOut()" href="${request.application_url}/logout">Logout</a>
 </span>
-<form action="${request.route_url('login')}" method="post" tal:condition="not logged_in">
+<form id="login_form" action="${request.route_url('login')}" method="post" tal:condition="not logged_in">
   <input type="hidden" name="came_from" value="${came_from}"/>
-  <input type="text" name="login" value="${login}" placeholder="Login"/><br/>
+  <input type="hidden" name="gplus_id" id="gplus_id" value=""/>
+  <input type="text" name="login" value="${login}" placeholder="user name"/><br/>
   <input type="password" name="password"
          value="${password}" placeholder="password"/><br/>
   <input type="submit" name="form.submitted" value="Log In"/>
 </form>
 Or else <a href="${request.application_url}/signup">Sign-up</a>.<br/>
-${came_from}
+<h4>Login with Google+:</h4>
+<button tal:condition="not logged_in"
+        onclick="gapi.auth.signIn({callback: signinCallback})"
+        id=gplusSignin>
+  <span class="gplusIcon"></span>
+  <span class="gplusText">
+  Sign in with Google
+  </span>
+</button>
+<script type="text/javascript">
+  (function() {
+      var po = document.createElement('script');
+      po.type = 'text/javascript';
+      po.async = true;
+      po.src = 'https://apis.google.com/js/client:plusone.js';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(po, s);
+  })();
+
+  function signinCallback(authResult) {
+      if (authResult['status']['signed_in'] && authResult['status']['method'] == 'PROMPT') {
+          // Update the app to reflect a signed in user
+          // document.getElementById('signinButton').setAttribute('style', 'display: none');
+          gapi.client.load('plus', 'v1', function() {
+              var request = gapi.client.plus.people.get( {'userId' : 'me'} );
+              request.execute( function(profile) {
+                  // document.getElementById('gplusmsg').innerHTML = 'Logged in as ' + profile.name.givenName;
+                  document.getElementById("gplus_id").value = profile.id;
+                  document.getElementById("login_form").submit();
+                  console.log('User id: ' + profile.id);
+                  console.log('Name: ' + profile.name.givenName);
+              });
+          });
+      } else {
+          // Update the app to reflect a signed out user
+          console.log('Sign-in state: ' + authResult['error']);
+      }
+  }
+</script>
