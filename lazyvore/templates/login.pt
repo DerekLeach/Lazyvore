@@ -2,9 +2,8 @@
 <span tal:replace="message"/>
 <span tal:condition="logged_in">
   You are logged in as ${logged_in}.
-  <a href="${request.application_url}/logout">Logout</a>
+  <a onclick="gapi.auth.signOut()" href="${request.application_url}/logout">Logout</a>
 </span>
-<p id="gplusmsg">Not logged in</p>
 <form id="login_form" action="${request.route_url('login')}" method="post" tal:condition="not logged_in">
   <input type="hidden" name="came_from" value="${came_from}"/>
   <input type="hidden" name="gplus_id" id="gplus_id" value=""/>
@@ -15,14 +14,15 @@
 </form>
 Or else <a href="${request.application_url}/signup">Sign-up</a>.<br/>
 <h4>Login with Google+:</h4>
-<meta name="google-signin-clientid" content="311409363904-tdvcelhl4t7g1n2d14fht1hl4g9m3rk6.apps.googleusercontent.com" />
-<meta name="google-signin-callback" content="signinCallback" />
-<meta name="google-signin-scope" content="profile" />
-<meta name="google-signin-requestvisibleactions" content="https://schema.org/AddAction" />
-<meta name="google-signin-cookiepolicy" content="single_host_origin" />
-<button onclick="gapi.auth.signOut()">Sign out of GPlus</button>
-<button onclick="gapi.auth.signIn()">Sign in with GPlus</button>
-<script tal:condition="not logged_in" type="text/javascript">
+<button tal:condition="not logged_in"
+        onclick="gapi.auth.signIn({callback: signinCallback})"
+        id=gplusSignin>
+  <span class="gplusIcon"></span>
+  <span class="gplusText">
+  Sign in with Google
+  </span>
+</button>
+<script type="text/javascript">
   (function() {
       var po = document.createElement('script');
       po.type = 'text/javascript';
@@ -33,14 +33,13 @@ Or else <a href="${request.application_url}/signup">Sign-up</a>.<br/>
   })();
 
   function signinCallback(authResult) {
-      if (authResult['status']['signed_in']) {
+      if (authResult['status']['signed_in'] && authResult['status']['method'] == 'PROMPT') {
           // Update the app to reflect a signed in user
-          document.getElementById('signinButton').setAttribute('style', 'display: none');
-          document.getElementById('gplusmsg').innerHTML = authResult['id_token'];
+          // document.getElementById('signinButton').setAttribute('style', 'display: none');
           gapi.client.load('plus', 'v1', function() {
               var request = gapi.client.plus.people.get( {'userId' : 'me'} );
               request.execute( function(profile) {
-                  document.getElementById('gplusmsg').innerHTML = 'Logged in as ' + profile.name.givenName;
+                  // document.getElementById('gplusmsg').innerHTML = 'Logged in as ' + profile.name.givenName;
                   document.getElementById("gplus_id").value = profile.id;
                   document.getElementById("login_form").submit();
                   console.log('User id: ' + profile.id);

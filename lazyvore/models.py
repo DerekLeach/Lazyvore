@@ -61,6 +61,10 @@ class User(Base):
         return DBSession.query(cls).filter(cls.username == username).first()
 
     @classmethod
+    def get_by_gplus_id(cls, gplus_id):
+        return DBSession.query(cls).filter(cls.gplus_id == gplus_id).first()
+
+    @classmethod
     def check_password(cls, username, password):
         user = cls.get_by_username(username)
         if not user:

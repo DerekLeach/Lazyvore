@@ -123,21 +123,24 @@ def login(request):
     came_from = request.params.get('came_from', main_view)
     gplus_id = request.params['gplus_id']
     if gplus_id:
-        headers = remember(request, gplus_id)
+        if not User.get_by_gplus_id(gplus_id):
+            user = User(gplus_id=gplus_id)
+            DBSession.add(user)
+
+        user_id = User.get_by_gplus_id(gplus_id).id
+        headers = remember(request, user_id)
         request.session.flash('Logged in via GPlus')
         return HTTPFound(location = came_from,
                          headers = headers)
 
     if 'form.submitted' in request.params:
-
-
         login = request.params['login']
         password = request.params['password']
 
         if User.check_password(login, password):
-
-            headers = remember(request, login)
-            request.session.flash('Logged in successfully')
+            user_id = User.get_by_username(login).id
+            headers = remember(request, user_id)
+            request.session.flash('Logged in with password')
             return HTTPFound(location = came_from,
                              headers = headers)
 
