@@ -1,60 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
-      xmlns:tal="http://xml.zope.org/namespaces/tal">
-<head>
-  <title>Sign-up - Lazyvore</title>
-  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
-  <meta name="keywords" content="python web application" />
-  <meta name="description" content"pyramid web application" />
-  <link rel="shortcut icon"
-        href="${request.static_url('lazyvore:static/favicon.ico')}" />
-  <link rel="stylesheet"
-        href="${request.static_url('lazyvore:static/theme.css')}"
-        type="text/css" media="screen" charset="utf-8" />
-  <link tal:repeat="item python: [request.static_url('deform:static/') + link for link in css_links]"
-        rel="stylesheet"
-        tal:attributes="href item"
-        type="text/css" />
-  <script tal:repeat="item python: [request.static_url('deform:static/') + link for link in js_links]"
-          type="text/javascript"
-          tal:attributes="src item"></script>
-  <!--[if lte IE 6]>
-  <link rel="stylecheet"
-        href="${request.static_url('lazyvore:static/ie6.css')}"
-        type="text/css" media="screen" charset="utf-8" />
-  <![endif]-->
-</head>
-<body>
-  <div id="wrap">
-    <div id="top-small">
-      <div class="top-small align-center">
-        <div>
-          <img width="220" height="220" alt="pyramid"
-        src="${request.static_url('lazyvore:static/pyramid.png')}" />
-        </div>
-      </div>
-    </div>
-    <div id="middle">
-      <div class="middle align-right">
-        <div id="left" class="app-welcome align-left">
-          <b>Sign-up</b><br/>
-          <span tal:replace="message"/>
-        </div>
-        <div id="right" class="app-welcome align-right"></div>
-      </div>
-    </div>
-    <div id="bottom">
-      <div class="bottom">
-        <span tal:replace="structure form"/>
-        Already got an account?
-        ${came_from}
-        <a href="${request.application_url}/login">Login</a>.<br/>
-      </div>
-    </div>
-  </div>
-  <script type="text/javascript">
-    deform.load()
-  </script>
-</body>
-</html>
+<metal:main use-macro="load: base.pt">
+<main metal:fill-slot="content">
+  <section>
+    <span tal:replace="structure form"/>
+    Already got an account?
+    ${came_from}
+    <a href="${request.application_url}/login">Login</a>.<br/>
+  </section>
+<script type="text/javascript">
+  deform.load()
+</script>
+</main>
+</metal:main>

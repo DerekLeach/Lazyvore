@@ -73,6 +73,7 @@ def view_page(request):
             content=content,
             edit_url=edit_url,
             login_form = login_form,
+            title=page.name,
             )
 
 @view_config(route_name='add_page', renderer='templates/edit.pt',
@@ -94,6 +95,7 @@ def add_page(request):
             page=page,
             save_url=save_url,
             login_form = login_form,
+            title=page.name,
             )
 
 @view_config(route_name='edit_page', renderer='templates/edit.pt',
@@ -113,6 +115,7 @@ def edit_page(request):
             page=page,
             save_url = request.route_url('edit_page', pagename=pagename),
             login_form = login_form,
+            title=page.name,
             )
 
 
@@ -183,8 +186,16 @@ def signup(request):
     referrer = request.url
     if referrer == login_url:
         referrer = '/' # never use the login form itself as came_from
-    came_from = request.params.get('came_from', referrer)
-    message = 'test'
+
+    response = dict(
+            form = signupForm.render(),
+            came_from = request.params.get('came_from', referrer),
+            message = 'test',
+            css_links = signupForm.get_widget_resources()['css'],
+            js_links = signupForm.get_widget_resources()['js'],
+            title = "Create Account",
+            login_form = login_form_view(request),
+            )
     
     if 'submit' in request.POST:
         controls = request.POST.items()
@@ -192,31 +203,68 @@ def signup(request):
         try:
             appstruct = signupForm.validate(controls)
         except ValidationFailure as e:
-            return dict(
-                    form = e.render(),
-                    came_from = came_from,
-                    message = message,
-                    css_links = signupForm.get_widget_resources()['css'],
-                    js_links = signupForm.get_widget_resources()['js'],
-                    )
+            response['form'] = e.render()
+            return response
+
         username = appstruct['username']
         password = appstruct['_password']
+
         if not User.get_by_username(username):
             user = User(username=username, password=password)
             DBSession.add(user)
-            headers = remember(request, username)
+            user_id = User.get_by_username(username).id
+            headers = remember(request, user_id)
 
             return HTTPFound(
                     location = request.route_url('view_wiki'),
                     headers = headers,
                     )
-        message = 'The user "{}" already exists.'.format(username)
 
-    return dict(
-            message = message,
-            url = request.application_url + '/signup',
-            came_from = came_from,
-            form = signupForm.render(),
+        response['message'] = 'The user "{}" already exists.'.format(username)
+        response['url'] = request.application_url + '/signup'
+
+    return response
+
+schema = SQLAlchemySchemaNode(User, includes=['username'])
+changeUsername = Form(schema, buttons=('change username',))
+schema = SQLAlchemySchemaNode(User, includes=['_password'])
+changePassword = Form(schema, buttons=('change password',))
+
+@view_config(route_name='account', renderer='templates/account.pt',
+             permission='edit')
+def account(request):
+    user = User.get_by_id(request.authenticated_userid)
+
+    response = dict(
+            username = user.username,
+            title = 'Account Settings',
+            login_form=login_form_view(request),
+            changeUsername = changeUsername.render(),
+            changePassword = changePassword.render(),
             css_links = signupForm.get_widget_resources()['css'],
             js_links = signupForm.get_widget_resources()['js'],
             )
+
+    if 'change_username' in request.POST:
+        controls = request.POST.items()
+        try:
+            appstruct = changeUsername.validate(controls)
+        except ValidationFailure as e:
+            response['changeUsername'] = e.render()
+            return response
+        if not User.get_by_username(appstruct['username']): 
+            user.username = appstruct['username']
+            response['username'] = appstruct['username']
+            return response
+        request.session.flash('Username already exists')
+
+    if 'change_password' in request.POST:
+        controls = request.POST.items()
+        try:
+            appstruct = changePassword.validate(controls)
+        except ValidationFailure as e:
+            response['changePassword'] = e.render()
+            return response
+        user.password = appstruct['_password']
+
+    return response

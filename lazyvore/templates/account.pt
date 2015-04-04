@@ -1,0 +1,10 @@
+<metal:main use-macro="load: base.pt">
+<main metal:fill-slot="content">
+  <section>
+    Username:<br/>
+    ${username}
+    <span tal:replace="structure changeUsername"/>
+    <span tal:replace="structure changePassword"/>
+  </section>
+</main>
+</metal:main>

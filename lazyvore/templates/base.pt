@@ -3,7 +3,7 @@
       xmlns:tal="http://xml.zope.org/namespaces/tal"
       xmlns:metal="http://xml.zope.org/namespaces/metal">
 <head>
-  <title>${page.name} - Lazyvore</title>
+  <title>Lazyvore - ${title}</title>
   <meta charset="utf-8" />
   <meta name="keywords" content="recipe sharing" />
   <meta name="description" content="Recipe sharing web application" />
@@ -39,6 +39,7 @@
   <ul>
     <li><a href="${request.route_url('view_wiki')}">Home</a></li>
     <li><a href="${request.route_url('login')}">Login</a></li>
+    <li><a href="${request.route_url('account')}">Account</a></li>
   </ul>
 </nav>
 <aside tal:content="structure login_form">
